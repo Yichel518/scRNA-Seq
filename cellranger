@@ -1,0 +1,54 @@
+# 10Xgenomics pipeline ## filtered gtf /home/yxtu/softwara/cellranger-3.0.2/cellranger mkgtf /home/yxtu/Data/
+single_cell/10Xgenomics/GCF_000002035.6_GRCz11_genomic.gtf /home/yxtu/
+Data/single_cell/10Xgenomics/GCF_000002035.6_GRCz11_genomic.filtered.gtf \ --attribute=gene_biotype:protein_coding \
+--attribute=gene_biotype:IG_LV_gene \ --attribute=gene_biotype:IG_V_gene \ --attribute=gene_biotype:IG_D_gene \
+--attribute=gene_biotype:IG_J_gene \ --attribute=gene_biotype:IG_C_gene \ --attribute=gene_biotype:TR_V_gene \
+--attribute=gene_biotype:TR_D_gene \ --attribute=gene_biotype:TR_J_gene \ --attribute=gene_biotype:TR_C_gene
+
+
+/home/yxtu/softwara/cellranger-3.0.2/cellranger mkgtf /home/yxtu/Data/
+single_cell/10Xgenomics/GCF_000002035.6_GRCz11_genomic.gtf /home/yxtu/
+Data/single_cell/10Xgenomics/GRCz11_genomic_coding.filtered.gtf \ --attribute=gene_biotype:protein_coding
+
+
+## contribute Ref+index 
+echo "/home/yxtu/softwara/cellranger-3.0.2/cellranger mkref --genome=GRCz11_coding\
+--fasta=/home/yxtu/Data/single _cell/10Xgenomics/GCF_000002035.6_GRCz11_genomic.fna \
+--genes=/home/yxtu/Data/single_cell/10Xgenomics/GRCz11_genomic_coding. filtered.gtf" > bash_codes/cellranger_index.pbs
+qsub -q batch -V -l nodes=1:ppn=4  bash_codes/cellranger_index.pbs
+                
+##QC 
+"/home/yxtu/softwara/fastqc/FastQC/fastqc" -o Data/single_cell/10Xgenomics/fastqc_result
+"/home/yxtu/Data/single_cel l/10Xgenomics/OVAR45/OVAR45_S1_L001_R1_001.fastq.gz" "/home/yxtu/Data/
+single_cell/10Xgenomics/OVAR45/OVAR45_S1_L001_R2_001.fastq.gz" "/home/yxtu/softwara/fastqc/FastQC/fastqc" -o
+Data/single_cell/10Xgenomics/fastqc_result "/home/yxtu/Data/single_cel
+l/10Xgenomics/TES42/TES42_S1_L001_R1_001.fastq.gz" "/home/yxtu/Data/si
+ngle_cell/10Xgenomics/TES42/TES42_S1_L001_R2_001.fastq.gz" 
+## count 
+echo
+"/home/yxtu/softwara/cellranger-3.0.2/cellranger count --id=output_TES
+--transcriptome=/home/yxtu/Data/single_cell/GRCz11/ --fastqs=/home/yxtu/Data/single_cell/10Xgenomics/TES42/
+--sample=TES42 --force-cells=8000" > bash_codes/cellranger_count_TES.pbs 
+echo
+"/home/yxtu/softwara/cellranger-3.0.2/cellranger count --id=output_OVAR
+--transcriptome=/home/yxtu/Data/single_cell/GRCz11/ --fastqs=/home/yxtu/Data/single_cell/10Xgenomics/OVAR45/
+--sample=OVAR45 --force-cells=8000" > bash_codes/cellranger_count_OVAR.pbs 
+qsub -q batch -V -l nodes=1:ppn=4 bash_codes/cellranger_count_OVAR.pbs 
+qsub -q batch -V -l nodes=1:ppn=4 bash_codes/cellranger_count_TES.pbs
+
+
+qsub -q batch -V -l nodes=2:ppn=4 tes.pbs
+
+
+And then we did a comprehensive analysis of all the cells
+
+echo "/home/yxtu/softwara/cellranger-3.0.2/cellranger count --id=output_1 --transcriptome=/home/yxtu/GRCz11_coding/
+--fastqs=/home/yxtu/Data/single_cell/10Xgenomics/TES42/ --sample=TES42 --force-cells=8000">bash_codes/cellranger_coding_TES.pbs 
+
+echo "/home/yxtu/softwara/cellranger-3.0.2/cellranger count --id=output_2
+--transcriptome=/home/yxtu/GRCz11_coding/ --fastqs=/home/yxtu/Data/single_cell/10Xgenomics/OVAR45/ --sample=OVAR45
+--force-cells=8000" >bash_codes/cellranger_coding_OVAR.pbs 
+qsub -q batch -V -l nodes=2:ppn=4 bash_codes/cellranger_coding_OVAR.pbs 
+qsub -q batch -V -l nodes=2:ppn=4 bash_codes/cellranger_coding_TES.pbs
+
+/home/yxtu/softwara/cellranger-3.0.2/cellranger count --id=output_OVAR --transcriptome=/home/yxtu/Data/single_cell/GRCz11/ --fastqs=/home/yxtu/Data/single_cell/10Xgenomics/OVAR45 --sample=OVAR45
